@@ -146,7 +146,7 @@ int tree_from_index(ObjectID *id_out) {
     if (offset > 8000) {
         return -1;
     }
-
+	// Get current index entry
         IndexEntry *e = &index->entries[i];
 
         // Convert hash to hex
