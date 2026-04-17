@@ -1,4 +1,4 @@
-w// pes.c — CLI entry point and command dispatch
+// pes.c — CLI entry point and command dispatch
 //
 // This file is PROVIDED. Do not modify.
 
@@ -15,23 +15,18 @@ w// pes.c — CLI entry point and command dispatch
 
 // Usage: pes init
 void cmd_init(void) {
-    if (mkdir(PES_DIR, 0755) != 0 && access(PES_DIR, F_OK) != 0) {
-        fprintf(stderr, "error: failed to create %s\n", PES_DIR);
-        return;
-    }
-    mkdir(OBJECTS_DIR, 0755);
+    mkdir(".pes", 0755);
+    mkdir(".pes/objects", 0755);
     mkdir(".pes/refs", 0755);
-    mkdir(REFS_DIR, 0755);
+    mkdir(".pes/refs/heads", 0755);   // MUST exist
 
-    if (access(HEAD_FILE, F_OK) != 0) {
-        FILE *f = fopen(HEAD_FILE, "w");
-        if (f) {
-            fprintf(f, "ref: refs/heads/main\n");
-            fclose(f);
-        }
+    FILE *f = fopen(".pes/HEAD", "w");
+    if (f) {
+        fprintf(f, "ref: refs/heads/main\n");
+        fclose(f);
     }
 
-    printf("Initialized empty PES repository in %s/\n", PES_DIR);
+    printf("Initialized empty PES repository in .pes/\n");
 }
 
 // Usage: pes add <file>...
