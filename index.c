@@ -220,15 +220,32 @@ int index_add(Index *index, const char *path) {
     if (index->count >= MAX_INDEX_ENTRIES)
         return -1;
 
+    FILE *fp = fopen(path, "rb");
+    if (!fp) return -1;
+
+    fseek(fp, 0, SEEK_END);
+    size_t size = ftell(fp);
+    rewind(fp);
+
+    void *data = malloc(size);
+    fread(data, 1, size, fp);
+    fclose(fp);
+
     IndexEntry *e = &index->entries[index->count];
 
-    strcpy(e->path, path);
-    e->mode = 100644;
+    // write blob to object store
+    if (object_write(OBJ_BLOB, data, size, &e->hash) != 0) {
+        free(data);
+        return -1;
+    }
 
-    // dummy values for now
-    strcpy(e->hash_hex, "dummyhash");
-    e->mtime = 0;
-    e->size = 0;
+    free(data);
+
+    e->mode = 100644;
+    e->size = size;
+    e->mtime_sec = 0;
+
+    strcpy(e->path, path);
 
     index->count++;
 
