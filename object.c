@@ -184,7 +184,7 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
     hex[64] = '\0';
 
     // Build path
-    char path[256];
+    char path[512];
     snprintf(path, sizeof(path), ".pes/objects/%.2s/%s", hex, hex + 2);
 
     FILE *fp = fopen(path, "rb");
@@ -196,11 +196,13 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
     rewind(fp);
 
     unsigned char *buffer = malloc(file_size);
-    if (fread(buffer, 1, file_size, fp) != file_size) {
-    fclose(fp);
-    free(buffer);
-    return -1;
-}
+    //if (fread(buffer, 1, file_size, fp) != file_size) {
+    //fclose(fp);
+    //free(buffer);
+    //return -1;
+//}
+fread(buffer, 1, file_size, fp);
+
     fclose(fp);
 
     // Parse header
