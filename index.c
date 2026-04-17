@@ -134,6 +134,7 @@ int index_status(const Index *index) {
 //   - hex_to_hash                      : converting the parsed string to ObjectID
 //
 // Returns 0 on success, -1 on error.
+
 int index_load(Index *index) {
 
     index->count = 0;
@@ -167,6 +168,7 @@ int index_load(Index *index) {
     return 0;
 }
 
+
 // Save the index to .pes/index atomically.
 //
 // HINTS - Useful functions and syscalls:
@@ -183,12 +185,19 @@ int index_save(const Index *index) {
     if (!fp) return -1;
 
     for (int i = 0; i < index->count; i++) {
-        IndexEntry *e = &index->entries[i];
 
-        fprintf(fp, "%o %s %ld %ld %s\n",
+        IndexEntry *e = (IndexEntry *)&index->entries[i];
+
+        char hex[65];
+        for (int j = 0; j < 32; j++)
+            sprintf(hex + j * 2, "%02x", e->hash.hash[j]);
+
+        hex[64] = '\0';
+
+        fprintf(fp, "%o %s %lu %u %s\n",
                 e->mode,
-                e->hash_hex,
-                e->mtime,
+                hex,
+                e->mtime_sec,
                 e->size,
                 e->path);
     }
@@ -196,7 +205,6 @@ int index_save(const Index *index) {
     fclose(fp);
     return 0;
 }
-
 
 // Stage a file for the next commit.
 //
