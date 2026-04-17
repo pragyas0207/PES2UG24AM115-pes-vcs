@@ -15,6 +15,10 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include "index.h"
+#include "object.h"
+#include <string.h>
+#include <stdio.h>
 
 // ─── Mode Constants ─────────────────────────────────────────────────────────
 
@@ -131,19 +135,13 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
 // Returns 0 on success, -1 on error.
 int tree_from_index(ObjectID *id_out) {
 
-    Index index;
-
-    // Step 1: Load index
-    if (index_load(&index) != 0) {
-        return -1;
-    }
 
     // Step 2: Build tree content
     char buffer[8192];
     int offset = 0;
 
-    for (size_t i = 0; i < index.count; i++) {
-        IndexEntry *e = &index.entries[i];
+    for (size_t i = 0; i < index->count; i++) {
+        IndexEntry *e = &index->entries[i];
 
         // Convert hash to hex
         char hex[65];
