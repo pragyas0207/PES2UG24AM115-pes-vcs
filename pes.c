@@ -1,4 +1,4 @@
-// pes.c — CLI entry point and command dispatch
+w// pes.c — CLI entry point and command dispatch
 //
 // This file is PROVIDED. Do not modify.
 
@@ -51,6 +51,10 @@ void cmd_add(int argc, char *argv[]) {
         if (index_add(&index, argv[i]) != 0) {
             fprintf(stderr, "error: failed to add '%s'\n", argv[i]);
         }
+if (index_save(&index) != 0) {
+        fprintf(stderr, "error: failed to save index\n");
+    }
+
     }
 }
 
