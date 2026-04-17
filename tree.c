@@ -141,6 +141,12 @@ int tree_from_index(ObjectID *id_out) {
     int offset = 0;
 
     for (size_t i = 0; i < index->count; i++) {
+
+// Prevent buffer overflow
+    if (offset > 8000) {
+        return -1;
+    }
+
         IndexEntry *e = &index->entries[i];
 
         // Convert hash to hex
