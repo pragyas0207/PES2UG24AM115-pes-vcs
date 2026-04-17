@@ -196,13 +196,43 @@ int head_update(const ObjectID *new_commit) {
 int commit_create(const char *message, ObjectID *commit_id_out) {
 
     ObjectID tree_id;
+    if (tree_from_index(&tree_id) != 0)
+        return -1;
 
-	ObjectID parent_id;
+    ObjectID parent_id;
     int has_parent = (head_read(&parent_id) == 0);
 
-    if (tree_from_index(&tree_id) != 0) {
-        return -1;
+    char buffer[4096];
+    int offset = 0;
+
+    // tree
+    char tree_hex[65];
+    for (int i = 0; i < 32; i++)
+        sprintf(tree_hex + i * 2, "%02x", tree_id.hash[i]);
+    tree_hex[64] = '\0';
+
+    offset += sprintf(buffer + offset, "tree %s\n", tree_hex);
+
+    // parent
+    if (has_parent) {
+        char parent_hex[65];
+        for (int i = 0; i < 32; i++)
+            sprintf(parent_hex + i * 2, "%02x", parent_id.hash[i]);
+        parent_hex[64] = '\0';
+
+        offset += sprintf(buffer + offset, "parent %s\n", parent_hex);
     }
+
+    // author
+    offset += sprintf(buffer + offset, "author %s\n", pes_author());
+    offset += sprintf(buffer + offset, "committer %s\n\n", pes_author());
+
+    // message
+    offset += sprintf(buffer + offset, "%s\n", message);
+
+    // write commit object
+    if (object_write(OBJ_COMMIT, buffer, offset, commit_id_out) != 0)
+        return -1;
 
     return 0;
 }
