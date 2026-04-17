@@ -151,7 +151,7 @@ int tree_from_index(ObjectID *id_out) {
         hex[64] = '\0';
 
         // Format: mode blob hash path
-        offset += sprintf(buffer + offset, "%o blob %s %s\n",
+	offset += sprintf(buffer + offset, "%o blob %s %s\n",
                           e->mode, hex, e->path);
     }
 
