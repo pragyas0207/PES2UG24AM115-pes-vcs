@@ -130,8 +130,37 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
 //
 // Returns 0 on success, -1 on error.
 int tree_from_index(ObjectID *id_out) {
-    // TODO: Implement recursive tree building
-    // (See Lab Appendix for logical steps)
-    (void)id_out;
-    return -1;
+
+    Index index;
+
+    // Step 1: Load index
+    if (index_load(&index) != 0) {
+        return -1;
+    }
+
+    // Step 2: Build tree content
+    char buffer[8192];
+    int offset = 0;
+
+    for (size_t i = 0; i < index.count; i++) {
+        IndexEntry *e = &index.entries[i];
+
+        // Convert hash to hex
+        char hex[65];
+        for (int j = 0; j < 32; j++) {
+            sprintf(hex + j * 2, "%02x", e->id.hash[j]);
+        }
+        hex[64] = '\0';
+
+        // Format: mode blob hash path
+        offset += sprintf(buffer + offset, "%o blob %s %s\n",
+                          e->mode, hex, e->path);
+    }
+
+    // Step 3: Write tree object
+    if (object_write(OBJ_TREE, buffer, offset, id_out) != 0) {
+        return -1;
+    }
+
+    return 0;
 }
