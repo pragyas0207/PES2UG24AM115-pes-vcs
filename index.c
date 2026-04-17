@@ -248,6 +248,7 @@ int index_add(Index *index, const char *path) {
     strcpy(e->path, path);
 
     index->count++;
+index_save(index)
 
     return 0;
 }
