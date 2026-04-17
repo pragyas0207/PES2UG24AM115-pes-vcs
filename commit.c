@@ -1,4 +1,4 @@
-// commit.c — Commit creation and history traversal
+w// commit.c — Commit creation and history traversal
 //
 // Commit object format (stored as text, one field per line):
 //
@@ -147,37 +147,40 @@ int head_read(ObjectID *id_out) {
 }
 
 // Update the current branch ref to point to a new commit atomically.
-int head_update(const ObjectID *new_commit) {
-    FILE *f = fopen(HEAD_FILE, "r");
-    if (!f) return -1;
-    char line[512];
-    if (!fgets(line, sizeof(line), f)) { fclose(f); return -1; }
-    fclose(f);
-    line[strcspn(line, "\r\n")] = '\0';
+int head_update(const ObjectID *id) {
 
-    char target_path[520];
-    if (strncmp(line, "ref: ", 5) == 0) {
-        snprintf(target_path, sizeof(target_path), "%s/%s", PES_DIR, line + 5);
-    } else {
-        snprintf(target_path, sizeof(target_path), "%s", HEAD_FILE); // Detached HEAD
+    FILE *head = fopen(".pes/HEAD", "r");
+    if (!head) return -1;
+
+    char ref[256];
+
+    // read: ref: refs/heads/main
+    if (fscanf(head, "ref: %255s", ref) != 1) {
+        fclose(head);
+        return -1;
     }
 
-    char tmp_path[528];
-    snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", target_path);
-    
-    f = fopen(tmp_path, "w");
+    fclose(head);
+
+    // build full path
+    char path[512];
+    snprintf(path, sizeof(path), ".pes/%s", ref);
+
+    FILE *f = fopen(path, "w");
     if (!f) return -1;
-    
-    char hex[HASH_HEX_SIZE + 1];
-    hash_to_hex(new_commit, hex);
+
+    // convert hash to hex
+    char hex[65];
+    for (int i = 0; i < 32; i++)
+        sprintf(hex + i * 2, "%02x", id->hash[i]);
+    hex[64] = '\0';
+
     fprintf(f, "%s\n", hex);
-    
-    fflush(f);
-    fsync(fileno(f));
     fclose(f);
-    
-    return rename(tmp_path, target_path);
+
+    return 0;
 }
+
 
 // ─── TODO: Implement these ───────────────────────────────────────────────────
 
