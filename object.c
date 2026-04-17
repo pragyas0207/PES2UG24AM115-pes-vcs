@@ -136,7 +136,7 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
     mkdir(dir, 0755);
 
     // File path
-    char path[512];
+    char path[256];
     snprintf(path, sizeof(path), "%s/%s", dir, hex + 2);
 
     // Write file
@@ -197,12 +197,11 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
     rewind(fp);
 
     unsigned char *buffer = malloc(file_size);
-    //if (fread(buffer, 1, file_size, fp) != file_size) {
-    //fclose(fp);
-    //free(buffer);
-    //return -1;
-//}
-fread(buffer, 1, file_size, fp);
+    if (fread(buffer, 1, file_size, fp) != file_size) {
+    fclose(fp);
+    free(buffer);
+    return -1;
+}
 
     fclose(fp);
 
