@@ -135,15 +135,37 @@ int index_status(const Index *index) {
 //
 // Returns 0 on success, -1 on error.
 int index_load(Index *index) {
+
     index->count = 0;
 
     FILE *fp = fopen(".pes/index", "r");
     if (!fp) return 0;
 
+    while (index->count < MAX_INDEX_ENTRIES) {
+
+        IndexEntry *e = &index->entries[index->count];
+
+        char hex[65];
+
+        if (fscanf(fp, "%o %64s %lu %u %s\n",
+                   &e->mode,
+                   hex,
+                   &e->mtime_sec,
+                   &e->size,
+                   e->path) != 5)
+            break;
+
+        // convert hex → binary hash
+        for (int i = 0; i < 32; i++) {
+            sscanf(hex + i * 2, "%2hhx", &e->hash.hash[i]);
+        }
+
+        index->count++;
+    }
+
     fclose(fp);
     return 0;
 }
-
 
 // Save the index to .pes/index atomically.
 //
