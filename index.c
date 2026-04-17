@@ -202,8 +202,21 @@ int index_save(const Index *index) {
 //
 // Returns 0 on success, -1 on error.
 int index_add(Index *index, const char *path) {
-    // TODO: Implement file staging
-    // (See Lab Appendix for logical steps)
-    (void)index; (void)path;
-    return -1;
+
+    if (index->count >= MAX_INDEX_ENTRIES)
+        return -1;
+
+    IndexEntry *e = &index->entries[index->count];
+
+    strcpy(e->path, path);
+    e->mode = 100644;
+
+    // dummy values for now
+    strcpy(e->hash_hex, "dummyhash");
+    e->mtime = 0;
+    e->size = 0;
+
+    index->count++;
+
+    return 0;
 }
